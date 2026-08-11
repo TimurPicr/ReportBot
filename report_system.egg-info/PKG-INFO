@@ -1,0 +1,13 @@
+Metadata-Version: 2.4
+Name: report-system
+Version: 0.1.0
+Summary: Local Russian technical report generation system
+Requires-Python: >=3.11
+Requires-Dist: pydantic<3,>=2.7
+Requires-Dist: pydantic-settings<3,>=2.2
+Requires-Dist: SQLAlchemy<3,>=2.0
+Requires-Dist: httpx<1,>=0.27
+Requires-Dist: python-docx<2,>=1.1
+Requires-Dist: streamlit<2,>=1.35
+Provides-Extra: dev
+Requires-Dist: pytest<9,>=8; extra == "dev"
