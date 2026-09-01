@@ -26,10 +26,10 @@ def main() -> None:
                         "type": "process",
                         "name": "Вакуумная сушка",
                         "parameters": [
-                            {"key": "duration", "name": "Продолжительность", "value": 12, "unit": "ч", "source": {"source_type": "user_input", "raw_text_fragment": "в течение 12 часов"}},
-                            {"key": "temperature", "name": "Температура", "value": 120, "unit": "°C", "source": {"source_type": "user_input", "raw_text_fragment": "120 °C"}},
-                            {"key": "pressure", "name": "Давление", "value": 0.01, "unit": "мбар", "source": {"source_type": "user_input", "raw_text_fragment": "0.01 мбар"}},
-                            {"key": "sample_id", "name": "Образец", "value": "E-17", "value_type": "text", "source": {"source_type": "user_input", "raw_text_fragment": "образец E-17"}},
+                            {"name": "Продолжительность", "value": 12, "unit": "ч", "source": {"source_type": "user_input", "raw_text_fragment": "в течение 12 часов"}},
+                            {"name": "Температура", "value": 120, "unit": "°C", "source": {"source_type": "user_input", "raw_text_fragment": "120 °C"}},
+                            {"name": "Давление", "value": 0.01, "unit": "мбар", "source": {"source_type": "user_input", "raw_text_fragment": "0.01 мбар"}},
+                            {"name": "Образец", "value": "E-17", "value_type": "text", "source": {"source_type": "user_input", "raw_text_fragment": "образец E-17"}},
                         ],
                     }
                 ],

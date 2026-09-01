@@ -3,7 +3,12 @@ import re
 from pathlib import Path
 
 from docx import Document as DocxDocument
+from docx.document import Document as DocxDocumentType
+from docx.enum.style import WD_STYLE_TYPE
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+from docx.table import Table
 
 from report_system.domain import Document, DocumentType, Parameter
 
@@ -40,16 +45,12 @@ def generate_docx(document: Document, templates_dir: Path, output_dir: Path) -> 
     docx.add_heading("Структурированные данные", level=1)
     for section in document.sections:
         docx.add_heading(section.name, level=2)
-        if section.description:
-            docx.add_paragraph(section.description)
         for record in section.records:
             docx.add_heading(record.name, level=3)
-            if record.description:
-                docx.add_paragraph(record.description)
             if not record.parameters:
                 continue
             table = docx.add_table(rows=1, cols=3)
-            table.style = "Table Grid"
+            _apply_table_grid(docx, table)
             for cell, label in zip(table.rows[0].cells, ("Параметр", "Значение", "Источник"), strict=True):
                 cell.text = label
             for parameter in record.parameters:
@@ -71,9 +72,35 @@ def _parameter_text(parameter: Parameter) -> str:
 
 
 def _source_text(parameter: Parameter) -> str:
-    if not parameter.source:
-        return ""
     return parameter.source.source_id or parameter.source.raw_text_fragment or parameter.source.source_path or ""
+
+
+def _apply_table_grid(document: DocxDocumentType, table: Table) -> None:
+    grid_style = next(
+        (
+            style
+            for style in document.styles
+            if style.type == WD_STYLE_TYPE.TABLE and style.style_id == "TableGrid"
+        ),
+        None,
+    )
+    if grid_style is not None:
+        table.style = grid_style
+        return
+
+    borders = table._tbl.tblPr.first_child_found_in("w:tblBorders")
+    if borders is None:
+        borders = OxmlElement("w:tblBorders")
+        table._tbl.tblPr.append(borders)
+    for edge_name in ("top", "left", "bottom", "right", "insideH", "insideV"):
+        edge = borders.find(qn(f"w:{edge_name}"))
+        if edge is None:
+            edge = OxmlElement(f"w:{edge_name}")
+            borders.append(edge)
+        edge.set(qn("w:val"), "single")
+        edge.set(qn("w:sz"), "4")
+        edge.set(qn("w:space"), "0")
+        edge.set(qn("w:color"), "auto")
 
 
 def _default_title(document_type: DocumentType) -> str:

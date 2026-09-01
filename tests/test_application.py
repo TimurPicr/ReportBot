@@ -13,6 +13,7 @@ from report_system.domain import (
     Parameter,
     Record,
     Section,
+    SourceReference,
 )
 from report_system.llm import FakeLLMProvider
 from report_system.validation import validate_facts
@@ -31,7 +32,20 @@ def settings(tmp_path: Path) -> Settings:
 
 
 def protocol(identifier: str, capacity: float, deviation: bool = False) -> Document:
-    records = [Record(type="measurement", name="Ёмкость", parameters=[Parameter(name="Значение", value=capacity, unit="А·ч")])]
+    records = [
+        Record(
+            type="measurement",
+            name="Ёмкость",
+            parameters=[
+                Parameter(
+                    name="Значение",
+                    value=capacity,
+                    unit="А·ч",
+                    source=SourceReference(source_type="user_input", raw_text_fragment=str(capacity)),
+                )
+            ],
+        )
+    ]
     if deviation:
         records.append(Record(type="deviation", name="Отклонение", parameters=[]))
     return Document(
@@ -48,7 +62,27 @@ def test_deterministic_validation_detects_unknown_facts() -> None:
     document = Document(
         document_type=DocumentType.MANUFACTURING_ACT,
         title="Акт E-17",
-        sections=[Section(name="Процесс", records=[Record(type="process", name="Сушка", parameters=[Parameter(name="Температура", value=120)])])],
+        sections=[
+            Section(
+                name="Процесс",
+                records=[
+                    Record(
+                        type="process",
+                        name="Сушка",
+                        parameters=[
+                            Parameter(
+                                name="Температура",
+                                value=120,
+                                source=SourceReference(
+                                    source_type="user_input",
+                                    raw_text_fragment="120",
+                                ),
+                            )
+                        ],
+                    )
+                ],
+            )
+        ],
     )
     valid = validate_facts(document, "Образец E-17 сушили при 120 °C.")
     invalid = validate_facts(document, "Образец X-99 сушили при 130 °C.")
@@ -64,10 +98,16 @@ def test_deterministic_validation_ignores_section_numbering() -> None:
 
 def test_test_act_is_built_deterministically_with_provenance() -> None:
     act = build_test_act([protocol("P-001", 4.81), protocol("P-002", 4.77, True)])
-    counts = {item.key: item.value for item in act.sections[1].records[0].parameters}
-    assert counts == {"protocol_count": 2, "test_count": 2, "result_count": 2, "deviation_count": 1}
+    counts = {item.name: item.value for item in act.sections[1].records[0].parameters}
+    assert counts == {
+        "Количество протоколов": 2,
+        "Количество испытаний": 2,
+        "Количество результатов": 2,
+        "Количество отклонений": 1,
+    }
+    assert all(item.source.source_type == "deterministic_aggregation" for item in act.sections[1].records[0].parameters)
     results = next(section for section in act.sections if section.name == "Результаты испытаний")
-    assert results.records[0].parameters[0].source.source_id == "P-001"  # type: ignore[union-attr]
+    assert results.records[0].parameters[0].source.source_id == "P-001"
 
 
 def test_test_act_rejects_wrong_or_unconfirmed_input() -> None:
@@ -170,9 +210,34 @@ def test_real_templates_are_usable(tmp_path: Path) -> None:
         title="Проверочный акт",
         status=DocumentStatus.GENERATED,
         generated_text="Проверочный текст.",
+        sections=[
+            Section(
+                name="Параметры",
+                records=[
+                    Record(
+                        type="measurement",
+                        name="Температура",
+                        parameters=[
+                            Parameter(
+                                name="Значение",
+                                value=120,
+                                unit="°C",
+                                source=SourceReference(
+                                    source_type="user_input",
+                                    raw_text_fragment="120 °C",
+                                ),
+                            )
+                        ],
+                    )
+                ],
+            )
+        ],
     )
     output = generate_docx(document, ROOT / "templates", tmp_path)
-    paragraphs = [paragraph.text for paragraph in DocxDocument(output).paragraphs]
+    generated_docx = DocxDocument(output)
+    paragraphs = [paragraph.text for paragraph in generated_docx.paragraphs]
     text = "\n".join(paragraphs)
     assert text.count("Проверочный акт") == 1
     assert "MA-CHECK-001" in text
+    assert len(generated_docx.tables) == 1
+    assert "<w:tblBorders>" in generated_docx.tables[0]._tbl.xml

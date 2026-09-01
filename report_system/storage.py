@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -68,14 +69,14 @@ class DocumentRepository:
     def get(self, document_id: str) -> Document | None:
         with self.sessions() as session:
             row = session.get(DocumentRow, document_id)
-            return Document.model_validate(row.content) if row else None
+            return _load_document(row.content) if row else None
 
     def list(self, document_type: str | None = None) -> list[Document]:
         query = select(DocumentRow).order_by(DocumentRow.created_at.desc())
         if document_type:
             query = query.where(DocumentRow.document_type == document_type)
         with self.sessions() as session:
-            return [Document.model_validate(row.content) for row in session.scalars(query)]
+            return [_load_document(row.content) for row in session.scalars(query)]
 
     def update(
         self,
@@ -155,3 +156,19 @@ class DocumentRepository:
             docx_path=docx_path,
         )
 
+
+def _load_document(content: dict[str, Any]) -> Document:
+    data = deepcopy(content)
+    document_id = str(data.get("id") or "legacy-document")
+    for section in data.get("sections", []):
+        section.pop("description", None)
+        for record in section.get("records", []):
+            record.pop("description", None)
+            for parameter in record.get("parameters", []):
+                parameter.pop("key", None)
+                if parameter.get("source") is None:
+                    parameter["source"] = {
+                        "source_type": "legacy_document",
+                        "source_id": document_id,
+                    }
+    return Document.model_validate(data)

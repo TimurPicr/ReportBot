@@ -152,7 +152,6 @@ def build_test_act(protocols: list[Document], title: str | None = None) -> Docum
                     name=protocol.title or protocol.id,
                     parameters=[
                         Parameter(
-                            key="conclusion",
                             name="Заключение протокола",
                             value=protocol.conclusion,
                             value_type=ValueType.TEXT,
@@ -168,7 +167,6 @@ def build_test_act(protocols: list[Document], title: str | None = None) -> Docum
             name=protocol.title or protocol.id,
             parameters=[
                 Parameter(
-                    key="protocol_id",
                     name="Идентификатор протокола",
                     value=protocol.id,
                     value_type=ValueType.TEXT,
@@ -178,14 +176,34 @@ def build_test_act(protocols: list[Document], title: str | None = None) -> Docum
         )
         for protocol in protocols
     ]
+    aggregation_source = SourceReference(
+        source_type="deterministic_aggregation",
+        raw_text_fragment=", ".join(protocol.id for protocol in protocols),
+    )
     summary = Record(
         type="aggregation_summary",
         name="Сводные показатели",
         parameters=[
-            Parameter(key="protocol_count", name="Количество протоколов", value=len(protocols)),
-            Parameter(key="test_count", name="Количество испытаний", value=test_count),
-            Parameter(key="result_count", name="Количество результатов", value=len(results)),
-            Parameter(key="deviation_count", name="Количество отклонений", value=len(deviations)),
+            Parameter(
+                name="Количество протоколов",
+                value=len(protocols),
+                source=aggregation_source,
+            ),
+            Parameter(
+                name="Количество испытаний",
+                value=test_count,
+                source=aggregation_source,
+            ),
+            Parameter(
+                name="Количество результатов",
+                value=len(results),
+                source=aggregation_source,
+            ),
+            Parameter(
+                name="Количество отклонений",
+                value=len(deviations),
+                source=aggregation_source,
+            ),
         ],
     )
     sections = [

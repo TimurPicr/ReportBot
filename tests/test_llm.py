@@ -20,7 +20,32 @@ ROOT = Path(__file__).parents[1]
 
 def test_extraction_uses_schema_and_preserves_only_returned_facts() -> None:
     provider = FakeLLMProvider(
-        [{"title": "Акт E-17", "sections": [{"name": "Процесс", "records": []}]}]
+        [
+            {
+                "title": "Акт E-17",
+                "sections": [
+                    {
+                        "name": "Процесс",
+                        "records": [
+                            {
+                                "type": "process",
+                                "name": "Сушка",
+                                "parameters": [
+                                    {
+                                        "name": "Образец",
+                                        "value": "E-17",
+                                        "source": {
+                                            "source_type": "user_input",
+                                            "raw_text_fragment": "образец E-17",
+                                        },
+                                    }
+                                ],
+                            }
+                        ],
+                    }
+                ],
+            }
+        ]
     )
     document = extract_document(
         provider,
@@ -30,8 +55,47 @@ def test_extraction_uses_schema_and_preserves_only_returned_facts() -> None:
     )
     assert document.status == DocumentStatus.EXTRACTED
     assert document.sections[0].name == "Процесс"
-    assert provider.requests[0]["json_schema"] is not None
+    schema = provider.requests[0]["json_schema"]
+    assert schema is not None
+    parameter_schema = schema["$defs"]["Parameter"]
+    assert "source" in parameter_schema["required"]
+    assert "key" not in parameter_schema["properties"]
+    assert "description" not in schema["$defs"]["Record"]["properties"]
+    assert "description" not in schema["$defs"]["Section"]["properties"]
+    assert schema["$defs"]["SourceReference"]["required"] == ["source_type", "raw_text_fragment"]
     assert "pressure" not in document.model_dump_json()
+
+
+def test_extraction_rejects_non_verbatim_source() -> None:
+    provider = FakeLLMProvider(
+        [
+            {
+                "sections": [
+                    {
+                        "name": "Процесс",
+                        "records": [
+                            {
+                                "type": "process",
+                                "name": "Сушка",
+                                "parameters": [
+                                    {
+                                        "name": "Температура",
+                                        "value": 120,
+                                        "source": {
+                                            "source_type": "user_input",
+                                            "raw_text_fragment": "температура 120 °C",
+                                        },
+                                    }
+                                ],
+                            }
+                        ],
+                    }
+                ]
+            }
+        ]
+    )
+    with pytest.raises(ValueError, match="not an exact fragment"):
+        extract_document(provider, ROOT / "prompts", DocumentType.MANUFACTURING_ACT, "Сушили при 120 °C.")
 
 
 def test_extraction_rejects_unsupported_type_and_blank_text() -> None:

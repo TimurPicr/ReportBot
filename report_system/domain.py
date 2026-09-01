@@ -71,12 +71,11 @@ class DocumentReference(BaseModel):
 class Parameter(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    key: str | None = None
     name: str = Field(min_length=1)
     value: Any
     unit: str | None = None
     value_type: ValueType = ValueType.SCALAR
-    source: SourceReference | None = None
+    source: SourceReference
 
     @model_validator(mode="after")
     def validate_value_shape(self) -> "Parameter":
@@ -101,7 +100,6 @@ class Record(BaseModel):
 
     type: str = Field(min_length=1)
     name: str = Field(min_length=1)
-    description: str | None = None
     parameters: list[Parameter] = Field(default_factory=list)
 
 
@@ -109,7 +107,6 @@ class Section(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     name: str = Field(min_length=1)
-    description: str | None = None
     records: list[Record] = Field(default_factory=list)
 
 
@@ -153,4 +150,3 @@ class ValidationResult(BaseModel):
 
     valid: bool
     issues: list[ValidationIssue] = Field(default_factory=list)
-

@@ -21,8 +21,15 @@ def test_unknown_parameter_and_provenance_are_supported() -> None:
         unit="%",
         source=SourceReference(source_type="user_input", raw_text_fragment="17.2 %"),
     )
-    assert parameter.key is None
-    assert parameter.source.raw_text_fragment == "17.2 %"  # type: ignore[union-attr]
+    assert "key" not in Parameter.model_fields
+    assert parameter.source.raw_text_fragment == "17.2 %"
+
+
+def test_parameter_requires_source_and_descriptions_are_not_supported() -> None:
+    with pytest.raises(ValidationError, match="source"):
+        Parameter(name="Температура", value=120)
+    assert "description" not in Record.model_fields
+    assert "description" not in Section.model_fields
 
 
 def test_document_has_isolated_mutable_defaults_and_flexible_records() -> None:
@@ -36,7 +43,12 @@ def test_document_has_isolated_mutable_defaults_and_flexible_records() -> None:
 
 def test_large_inline_timeseries_is_rejected() -> None:
     with pytest.raises(ValidationError, match="stored externally"):
-        Parameter(name="Сигнал", value=list(range(1001)), value_type=ValueType.TIMESERIES)
+        Parameter(
+            name="Сигнал",
+            value=list(range(1001)),
+            value_type=ValueType.TIMESERIES,
+            source=SourceReference(source_type="file", source_path="signal.csv"),
+        )
 
 
 def test_document_reference_tracks_revision_and_rejects_self_reference() -> None:
@@ -49,4 +61,3 @@ def test_document_reference_tracks_revision_and_rejects_self_reference() -> None
     assert reference.source_revision == 2
     with pytest.raises(ValidationError, match="cannot reference itself"):
         DocumentReference(source_id="same", target_id="same", relation_type=RelationType.SUMMARIZES)
-

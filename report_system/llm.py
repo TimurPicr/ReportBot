@@ -114,6 +114,15 @@ def extract_document(
         raise ValueError("raw input cannot be empty")
 
     full_schema = Document.model_json_schema()
+    full_schema["$defs"]["SourceReference"] = {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "source_type": {"type": "string", "const": "user_input"},
+            "raw_text_fragment": {"type": "string", "minLength": 1, "maxLength": 200},
+        },
+        "required": ["source_type", "raw_text_fragment"],
+    }
     fields = ("title", "metadata", "sections", "conclusion")
     schema = {
         "$defs": full_schema.get("$defs", {}),
@@ -130,11 +139,24 @@ def extract_document(
     unknown = set(data) - set(fields)
     if unknown:
         raise ValueError(f"unexpected extraction fields: {sorted(unknown)}")
+    sections = [Section.model_validate(item) for item in data.get("sections", [])]
+    for section in sections:
+        for record in section.records:
+            for parameter in record.parameters:
+                source = parameter.source
+                if source.source_type != "user_input" or not source.raw_text_fragment:
+                    raise ValueError("extracted parameter source must be a user_input text fragment")
+                if len(source.raw_text_fragment) > 200:
+                    raise ValueError("extracted source text fragment must not exceed 200 characters")
+                if source.raw_text_fragment not in raw_input:
+                    raise ValueError(
+                        f"extracted source is not an exact fragment of raw input: {source.raw_text_fragment!r}"
+                    )
     return Document(
         document_type=document_type,
         title=data.get("title"),
         metadata=data.get("metadata", {}),
-        sections=[Section.model_validate(item) for item in data.get("sections", [])],
+        sections=sections,
         conclusion=data.get("conclusion"),
         raw_input=raw_input,
         status=DocumentStatus.EXTRACTED,
