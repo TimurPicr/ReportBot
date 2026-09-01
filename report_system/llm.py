@@ -47,7 +47,11 @@ class OllamaProvider:
             "prompt": prompt,
             "stream": False,
             "think": False,
-            "options": {"temperature": temperature},
+            "options": {
+                "temperature": temperature,
+                "num_ctx": 8192,
+                "num_predict": 4096,
+            },
         }
         if json_schema is not None:
             payload["format"] = dict(json_schema)
@@ -66,7 +70,7 @@ class OllamaProvider:
         try:
             result = json.loads(text)
         except json.JSONDecodeError as error:
-            raise ValueError(f"Ollama returned invalid JSON: {text[:200]!r}") from error
+            raise ValueError(f"Ollama returned invalid JSON: {text!r}") from error
         if not isinstance(result, dict):
             raise ValueError("structured Ollama response must be a JSON object")
         return result
@@ -137,29 +141,7 @@ def extract_document(
     )
 
 
-def load_examples(root: Path, document_type: DocumentType, limit: int = 3) -> list[str]:
-    from docx import Document as DocxDocument
-
-    directory = root / {
-        DocumentType.MANUFACTURING_ACT: "manufacturing",
-        DocumentType.TEST_PROTOCOL: "protocols",
-        DocumentType.TEST_ACT: "test_acts",
-    }[document_type]
-    if not directory.exists() or limit <= 0:
-        return []
-    result: list[str] = []
-    for path in sorted(directory.iterdir()):
-        if path.suffix.lower() in {".txt", ".md"}:
-            result.append(path.read_text(encoding="utf-8"))
-        elif path.suffix.lower() == ".docx":
-            document = DocxDocument(path)
-            result.append("\n".join(paragraph.text for paragraph in document.paragraphs if paragraph.text))
-        if len(result) == limit:
-            break
-    return result
-
-
-def generate_report(provider: LLMProvider, prompts_dir: Path, examples_dir: Path, document: Document) -> str:
+def generate_report(provider: LLMProvider, prompts_dir: Path, document: Document) -> str:
     if document.status != DocumentStatus.CONFIRMED:
         raise ValueError("document must be confirmed before generation")
     prompt_file = {
@@ -177,8 +159,6 @@ def generate_report(provider: LLMProvider, prompts_dir: Path, examples_dir: Path
     }
     request = (
         f"{_prompt(prompts_dir, prompt_file)}\n\n"
-        "ПРИМЕРЫ СТИЛЯ (не являются источником фактов):\n"
-        f"{json.dumps([item[:6000] for item in load_examples(examples_dir, document.document_type)], ensure_ascii=False)}\n\n"
         f"ПОДТВЕРЖДЁННЫЕ ФАКТЫ:\n{json.dumps(facts, ensure_ascii=False)}"
     )
     response = provider.generate(request, temperature=0.1)
@@ -200,3 +180,33 @@ def validate_semantics(
     )
     response = provider.generate(request, json_schema=ValidationResult.model_json_schema(), temperature=0.0)
     return ValidationResult.model_validate_json(response) if isinstance(response, str) else ValidationResult.model_validate(response)
+
+
+def revise_report(
+    provider: LLMProvider,
+    prompts_dir: Path,
+    document: Document,
+    generated_text: str,
+    validation: ValidationResult,
+) -> str:
+    facts = {
+        "document_type": document.document_type.value,
+        "title": document.title,
+        "metadata": document.metadata,
+        "sections": [section.model_dump(mode="json") for section in document.sections],
+        "source_document_ids": document.source_document_ids,
+        "conclusion": document.conclusion,
+    }
+    request = (
+        f"{_prompt(prompts_dir, 'revise_report.txt')}\n\n"
+        f"ПОДТВЕРЖДЁННЫЕ ФАКТЫ:\n{json.dumps(facts, ensure_ascii=False)}\n\n"
+        f"ОШИБКИ ВАЛИДАЦИИ:\n{validation.model_dump_json()}\n\n"
+        f"ИСХОДНЫЙ ТЕКСТ ОТЧЁТА:\n{generated_text}"
+    )
+    response = provider.generate(request, temperature=0.0)
+    if not isinstance(response, str):
+        raise TypeError("report reviser expects a text response")
+    revised = response.strip()
+    if not revised:
+        raise ValueError("report reviser returned an empty response")
+    return revised

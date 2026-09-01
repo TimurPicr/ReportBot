@@ -1,0 +1,121 @@
+```json
+{
+  "parameters": [
+    {
+      "key": null,
+      "source_type": "user_input",
+      "raw_text_fragment": "14.08"
+    },
+    {
+      "key": null,
+      "source_type": "user_input",
+      "raw_text_fragment": "мембрана М-24"
+    },
+    {
+      "key": null,
+      "source_type": "user_input",
+      "raw_text_fragment": "смена 2"
+    },
+    {
+      "key": null,
+      "source_type": "user_input",
+      "raw_text_fragment": "порошок БА-17 — 300 г"
+    },
+    {
+      "key": null,
+      "source_type": "user_input",
+      "raw_text_fragment": "Растворитель MEK/EtOH 70/30, всего 190 г"
+    },
+    {
+      "key": null,
+      "source_type": "user_input",
+      "raw_text_fragment": "Диспергатор BYK-111 3,0 г"
+    },
+    {
+      "key": null,
+      "source_type": "user_input",
+      "raw_text_fragment": "Крутили порошок + растворитель + диспергатор 3 ч"
+    },
+    {
+      "key": null,
+      "source_type": "user_input",
+      "raw_text_fragment": "связка PMMA 24 г"
+    },
+    {
+      "key": null,
+      "source_type": "user_input",
+      "raw_text_fragment": "пластификатор DBP 12 г"
+    },
+    {
+      "key": null,
+      "source_type": "user_input",
+      "raw_text_fragment": "Еще 16 ч на роллах"
+    },
+    {
+      "key": null,
+      "source_type": "user_input",
+      "raw_text_fragment": "Вязкость утром была 3,8 Па·с (25 °C)"
+    },
+    {
+      "key": null,
+      "source_type": "user_input",
+      "raw_text_fragment": "Добавили еще 8 г смеси растворителей"
+    },
+    {
+      "key": null,
+      "source_type": "user_input",
+      "raw_text_fragment": "после этого 3,1 Па·с"
+    },
+    {
+      "key": null,
+      "source_type": "user_input",
+      "raw_text_fragment": "Фильтр 100 мкм"
+    },
+    {
+      "key": null,
+      "source_type": "user_input",
+      "raw_text_fragment": "Вакуум примерно 15 мин, -0,08 МПа"
+    },
+    {
+      "key": null,
+      "source_type": "user_input",
+      "raw_text_fragment": "Лили ножом 0,75 мм"
+    },
+    {
+      "key": null,
+      "source_type": "user_input",
+      "raw_text_fragment": "скорость каретки 0,6 м/мин"
+    },
+    {
+      "key": null,
+      "source_type": "user_input",
+      "raw_text_fragment": "Подложка силиконизированный ПЭТ"
+    },
+    {
+      "key": null,
+      "source_type": "user_input",
+      "raw_text_fragment": "Сушилось при комнатной, примерно 21-23 °C, ночь"
+    },
+    {
+      "key": null,
+      "source_type": "user_input",
+      "raw_text_fragment": "Получилось 5 листов"
+    },
+    {
+      "key": null,
+      "source_type": "user_input",
+      "raw_text_fragment": "один край у листа №2 с утолщением — этот кусок отрезали"
+    },
+    {
+      "key": null,
+      "source_type": "user_input",
+      "raw_text_fragment": "Годная площадь суммарно 1,7 м2"
+    },
+    {
+      "key": null,
+      "source_type": "user_input",
+      "raw_text_fragment": "Толщина сухой ленты 0,31-0,34 мм"
+    }
+  ]
+}
+```

@@ -12,12 +12,11 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=PROJECT_ROOT / ".env", env_prefix="REPORT_", extra="ignore")
 
     ollama_url: str = "http://127.0.0.1:11434"
-    ollama_model: str = "qwen3.5:9b"
+    ollama_model: str = "qwen3.5-unsloth-q6:latest"
     database_url: str = f"sqlite:///{PROJECT_ROOT / 'data' / 'reports.db'}"
     output_dir: Path = PROJECT_ROOT / "data" / "generated"
     prompts_dir: Path = PROJECT_ROOT / "prompts"
     templates_dir: Path = PROJECT_ROOT / "templates"
-    examples_dir: Path = PROJECT_ROOT / "examples"
 
     @field_validator("ollama_url")
     @classmethod

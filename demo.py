@@ -46,7 +46,6 @@ def main() -> None:
             database_url=f"sqlite:///{ROOT / 'data' / 'demo.db'}",
             prompts_dir=ROOT / "prompts",
             templates_dir=ROOT / "templates",
-            examples_dir=ROOT / "examples",
             output_dir=ROOT / "data" / "generated",
         ),
         provider,

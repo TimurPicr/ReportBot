@@ -10,7 +10,7 @@ from report_system.llm import (
     OllamaProvider,
     extract_document,
     generate_report,
-    load_examples,
+    revise_report,
     validate_semantics,
 )
 
@@ -46,9 +46,10 @@ def test_generation_requires_confirmation() -> None:
     provider = FakeLLMProvider(["  Технический текст.  "])
     document = Document(document_type=DocumentType.TEST_PROTOCOL)
     with pytest.raises(ValueError, match="confirmed"):
-        generate_report(provider, ROOT / "prompts", ROOT / "examples", document)
+        generate_report(provider, ROOT / "prompts", document)
     document.status = DocumentStatus.CONFIRMED
-    assert generate_report(provider, ROOT / "prompts", ROOT / "examples", document) == "Технический текст."
+    assert generate_report(provider, ROOT / "prompts", document) == "Технический текст."
+    assert "ПРИМЕРЫ СТИЛЯ" not in provider.requests[-1]["prompt"]
 
 
 def test_semantic_validation_is_structured() -> None:
@@ -61,6 +62,33 @@ def test_semantic_validation_is_structured() -> None:
     )
     assert isinstance(result, ValidationResult)
     assert not result.valid
+
+
+def test_report_revision_receives_confirmed_facts_and_issues() -> None:
+    provider = FakeLLMProvider(["Исправленный текст."])
+    document = Document(
+        document_type=DocumentType.TEST_PROTOCOL,
+        title="Протокол P-001",
+    )
+    validation = ValidationResult.model_validate(
+        {
+            "valid": False,
+            "issues": [
+                {
+                    "severity": "error",
+                    "statement": "999",
+                    "reason": "Число не подтверждено",
+                }
+            ],
+        }
+    )
+    result = revise_report(provider, ROOT / "prompts", document, "Значение 999.", validation)
+    assert result == "Исправленный текст."
+    request = provider.requests[0]["prompt"]
+    assert "Протокол P-001" in request
+    assert "Значение 999." in request
+    assert "Число не подтверждено" in request
+    assert provider.requests[0]["temperature"] == 0.0
 
 
 def test_ollama_is_loopback_only_and_disables_thinking(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -78,17 +106,3 @@ def test_ollama_is_loopback_only_and_disables_thinking(monkeypatch: pytest.Monke
     )
     assert result == {"ok": True}
     assert captured["think"] is False
-
-
-def test_examples_load_from_txt_md_and_docx(tmp_path: Path) -> None:
-    from docx import Document as DocxDocument
-
-    directory = tmp_path / "protocols"
-    directory.mkdir()
-    (directory / "01.txt").write_text("TXT", encoding="utf-8")
-    (directory / "02.md").write_text("MD", encoding="utf-8")
-    docx = DocxDocument()
-    docx.add_paragraph("DOCX")
-    docx.save(directory / "03.docx")
-    assert load_examples(tmp_path, DocumentType.TEST_PROTOCOL) == ["TXT", "MD", "DOCX"]
-

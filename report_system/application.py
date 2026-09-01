@@ -15,7 +15,14 @@ from report_system.domain import (
     ValidationResult,
     ValueType,
 )
-from report_system.llm import LLMProvider, OllamaProvider, extract_document, generate_report, validate_semantics
+from report_system.llm import (
+    LLMProvider,
+    OllamaProvider,
+    extract_document,
+    generate_report,
+    revise_report,
+    validate_semantics,
+)
 from report_system.storage import DocumentRepository
 from report_system.validation import validate_facts
 
@@ -46,26 +53,49 @@ class ReportApplication:
         document = self.repository.get(document_id)
         if document is None:
             raise KeyError(document_id)
+        document.generated_text = None
         text = generate_report(
             self.provider,
             self.settings.prompts_dir,
-            self.settings.examples_dir,
             document,
         )
-        validation = validate_facts(document, text)
-        if semantic_validation:
-            semantic = validate_semantics(self.provider, self.settings.prompts_dir, document, text)
-            validation = ValidationResult(
-                valid=validation.valid and semantic.valid,
-                issues=validation.issues + semantic.issues,
+        validation = self._validate_generated_text(document, text, semantic_validation)
+        if not validation.valid:
+            text = revise_report(
+                self.provider,
+                self.settings.prompts_dir,
+                document,
+                text,
+                validation,
             )
+            validation = self._validate_generated_text(document, text, semantic_validation)
+
+        if not validation.valid:
+            document.status = DocumentStatus.CONFIRMED
+            self.repository.update(document, increment_revision=False)
+            return document, validation, None
+
         document.generated_text = text
-        output: Path | None = None
-        if validation.valid:
-            document.status = DocumentStatus.GENERATED
-            output = generate_docx(document, self.settings.templates_dir, self.settings.output_dir)
-        self.repository.update(document, str(output) if output else None, increment_revision=False)
+        document.status = DocumentStatus.GENERATED
+        output = generate_docx(document, self.settings.templates_dir, self.settings.output_dir)
+        self.repository.update(document, str(output), increment_revision=False)
         return document, validation, output
+
+    def _validate_generated_text(
+        self,
+        document: Document,
+        text: str,
+        semantic_validation: bool,
+    ) -> ValidationResult:
+        deterministic = validate_facts(document, text)
+        if not semantic_validation:
+            return deterministic
+        semantic = validate_semantics(self.provider, self.settings.prompts_dir, document, text)
+        issues = deterministic.issues + semantic.issues
+        return ValidationResult(
+            valid=deterministic.valid and semantic.valid and not issues,
+            issues=issues,
+        )
 
     def build_test_act(self, protocol_ids: list[str], title: str | None = None) -> Document:
         protocols: list[Document] = []

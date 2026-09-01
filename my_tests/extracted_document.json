@@ -1,0 +1,390 @@
+{
+  "id": "5d76ed0e-e7e6-4e6a-b3f7-7f22b1e519d9",
+  "document_type": "manufacturing_act",
+  "title": null,
+  "metadata": {
+    "document_type": "manufacturing_act",
+    "source_type": "user_input"
+  },
+  "sections": [
+    {
+      "name": "raw_materials",
+      "description": "Исходные материалы и их количества",
+      "records": [
+        {
+          "type": "powder",
+          "name": "БА-17",
+          "description": null,
+          "parameters": [
+            {
+              "key": null,
+              "name": "mass",
+              "value": 300,
+              "unit": "г",
+              "value_type": "scalar",
+              "source": null
+            }
+          ]
+        },
+        {
+          "type": "solvent_mixture",
+          "name": "MEK/EtOH",
+          "description": "70/30",
+          "parameters": [
+            {
+              "key": null,
+              "name": "total_mass",
+              "value": 190,
+              "unit": "г",
+              "value_type": "scalar",
+              "source": null
+            }
+          ]
+        },
+        {
+          "type": "dispersant",
+          "name": "BYK-111",
+          "description": null,
+          "parameters": [
+            {
+              "key": null,
+              "name": "mass",
+              "value": 3.0,
+              "unit": "г",
+              "value_type": "scalar",
+              "source": null
+            }
+          ]
+        },
+        {
+          "type": "binder",
+          "name": "PMMA",
+          "description": null,
+          "parameters": [
+            {
+              "key": null,
+              "name": "mass",
+              "value": 24,
+              "unit": "г",
+              "value_type": "scalar",
+              "source": null
+            }
+          ]
+        },
+        {
+          "type": "plasticizer",
+          "name": "DBP",
+          "description": null,
+          "parameters": [
+            {
+              "key": null,
+              "name": "mass",
+              "value": 12,
+              "unit": "г",
+              "value_type": "scalar",
+              "source": null
+            }
+          ]
+        },
+        {
+          "type": "solvent_addition",
+          "name": "MEK/EtOH mixture",
+          "description": "8 г добавлено после первой вязкости",
+          "parameters": [
+            {
+              "key": null,
+              "name": "mass",
+              "value": 8,
+              "unit": "г",
+              "value_type": "scalar",
+              "source": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "process_parameters",
+      "description": "Параметры процесса наработки",
+      "records": [
+        {
+          "type": "mixing_step_1",
+          "name": "Кручение порошка + растворителя + диспергатора",
+          "description": null,
+          "parameters": [
+            {
+              "key": null,
+              "name": "duration",
+              "value": 3,
+              "unit": "ч",
+              "value_type": "scalar",
+              "source": null
+            }
+          ]
+        },
+        {
+          "type": "mixing_step_2",
+          "name": "Кручение с добавлением связки и пластификатора",
+          "description": null,
+          "parameters": [
+            {
+              "key": null,
+              "name": "duration",
+              "value": 16,
+              "unit": "ч",
+              "value_type": "scalar",
+              "source": null
+            }
+          ]
+        },
+        {
+          "type": "filtration",
+          "name": "Фильтрация",
+          "description": null,
+          "parameters": [
+            {
+              "key": null,
+              "name": "filter_mesh_size",
+              "value": 100,
+              "unit": "мкм",
+              "value_type": "scalar",
+              "source": null
+            },
+            {
+              "key": null,
+              "name": "vacuum_duration",
+              "value": 15,
+              "unit": "мин",
+              "value_type": "scalar",
+              "source": null
+            },
+            {
+              "key": null,
+              "name": "vacuum_pressure",
+              "value": -0.08,
+              "unit": "МПа",
+              "value_type": "scalar",
+              "source": null
+            }
+          ]
+        },
+        {
+          "type": "coating_step",
+          "name": "Нанесение (ножом)",
+          "description": null,
+          "parameters": [
+            {
+              "key": null,
+              "name": "knife_gap",
+              "value": 0.75,
+              "unit": "мм",
+              "value_type": "scalar",
+              "source": null
+            },
+            {
+              "key": null,
+              "name": "carriage_speed",
+              "value": 0.6,
+              "unit": "м/мин",
+              "value_type": "scalar",
+              "source": null
+            }
+          ]
+        },
+        {
+          "type": "drying_step",
+          "name": "Сушка",
+          "description": null,
+          "parameters": [
+            {
+              "key": null,
+              "name": "temperature_min",
+              "value": 21,
+              "unit": "°C",
+              "value_type": "scalar",
+              "source": null
+            },
+            {
+              "key": null,
+              "name": "temperature_max",
+              "value": 23,
+              "unit": "°C",
+              "value_type": "scalar",
+              "source": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "quality_control",
+      "description": "Контроль качества и результаты",
+      "records": [
+        {
+          "type": "viscosity_check_1",
+          "name": "Вязкость после первого этапа (утром)",
+          "description": null,
+          "parameters": [
+            {
+              "key": null,
+              "name": "value",
+              "value": 3.8,
+              "unit": "Па·с",
+              "value_type": "scalar",
+              "source": null
+            },
+            {
+              "key": null,
+              "name": "temperature",
+              "value": 25,
+              "unit": "°C",
+              "value_type": "scalar",
+              "source": null
+            }
+          ]
+        },
+        {
+          "type": "viscosity_check_2",
+          "name": "Вязкость после добавления растворителя",
+          "description": null,
+          "parameters": [
+            {
+              "key": null,
+              "name": "value",
+              "value": 3.1,
+              "unit": "Па·с",
+              "value_type": "scalar",
+              "source": null
+            }
+          ]
+        },
+        {
+          "type": "final_product_metrics",
+          "name": "Итоговые параметры ленты",
+          "description": null,
+          "parameters": [
+            {
+              "key": null,
+              "name": "total_good_area_min",
+              "value": 1.7,
+              "unit": "м2",
+              "value_type": "scalar",
+              "source": null
+            },
+            {
+              "key": null,
+              "name": "thickness_min",
+              "value": 0.31,
+              "unit": "мм",
+              "value_type": "scalar",
+              "source": null
+            },
+            {
+              "key": null,
+              "name": "thickness_max",
+              "value": 0.34,
+              "unit": "мм",
+              "value_type": "scalar",
+              "source": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "equipment_and_materials",
+      "description": "Оборудование и вспомогательные материалы",
+      "records": [
+        {
+          "type": "substrate",
+          "name": "Подложка",
+          "description": null,
+          "parameters": [
+            {
+              "key": null,
+              "name": "material_description",
+              "value": "силиконизированный ПЭТ",
+              "unit": null,
+              "value_type": "scalar",
+              "source": null
+            }
+          ]
+        },
+        {
+          "type": "membrane_info",
+          "name": "Мембрана",
+          "description": null,
+          "parameters": [
+            {
+              "key": null,
+              "name": "model",
+              "value": "М-24",
+              "unit": null,
+              "value_type": "scalar",
+              "source": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "production_log",
+      "description": "Журнал производства",
+      "records": [
+        {
+          "type": "shift_info",
+          "name": "Смена",
+          "description": null,
+          "parameters": [
+            {
+              "key": null,
+              "name": "number",
+              "value": 2,
+              "unit": "",
+              "value_type": "scalar",
+              "source": null
+            }
+          ]
+        },
+        {
+          "type": "date_info",
+          "name": "Дата",
+          "description": null,
+          "parameters": [
+            {
+              "key": null,
+              "name": "day",
+              "value": 14.08,
+              "unit": "",
+              "value_type": "scalar",
+              "source": null
+            }
+          ]
+        },
+        {
+          "type": "yield_info",
+          "name": "Выход продукции",
+          "description": null,
+          "parameters": [
+            {
+              "key": null,
+              "name": "sheets_count",
+              "value": 5,
+              "unit": "шт",
+              "value_type": "scalar",
+              "source": null
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "source_document_ids": [],
+  "raw_input": "14.08, мембрана М-24, смена 2.\nНадо зафиксировать: сначала порошок БА-17 — 300 г. Растворитель MEK/EtOH 70/30, всего 190 г. Диспергатор BYK-111 3,0 г. Крутили порошок + растворитель + диспергатор 3 ч, потом связка PMMA 24 г и пластификатор DBP 12 г. Еще 16 ч на роллах.\nВязкость утром была 3,8 Па·с (25 °C). Добавили еще 8 г смеси растворителей, после этого 3,1 Па·с.\nФильтр 100 мкм. Вакуум примерно 15 мин, -0,08 МПа.\nЛили ножом 0,75 мм, скорость каретки 0,6 м/мин. Подложка силиконизированный ПЭТ. Сушилось при комнатной, примерно 21-23 °C, ночь.\nПолучилось 5 листов, один край у листа №2 с утолщением — этот кусок отрезали. Годная площадь суммарно 1,7 м2. Толщина сухой ленты 0,31-0,34 мм.",
+  "conclusion": null,
+  "generated_text": null,
+  "status": "extracted",
+  "revision": 1,
+  "created_at": "2026-08-31T16:37:07.309246Z",
+  "updated_at": "2026-08-31T16:37:07.309285Z"
+}

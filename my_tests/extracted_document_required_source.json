@@ -1,0 +1,289 @@
+{
+  "title": null,
+  "sections": [
+    {
+      "name": "Состав и подготовка",
+      "records": [
+        {
+          "type": "material",
+          "name": "Порошок БА-17",
+          "parameters": [
+            {
+              "name": "mass",
+              "value": "300",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "сначала порошок БА-17 — 300 г"
+              }
+            },
+            {
+              "name": "solvent_ratio",
+              "value": "70/30",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "Растворитель MEK/EtOH 70/30"
+              }
+            },
+            {
+              "name": "solvent_total_mass",
+              "value": "190",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "всего 190 г"
+              }
+            },
+            {
+              "name": "dispersant_name",
+              "value": "BYK-111",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "Диспергатор BYK-111"
+              }
+            },
+            {
+              "name": "dispersant_mass",
+              "value": "3,0",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "Диспергатор BYK-111 3,0 г"
+              }
+            },
+            {
+              "name": "mixing_time_initial",
+              "value": "3 ч",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "Крутили порошок + растворитель + диспергатор 3 ч"
+              }
+            },
+            {
+              "name": "polymer_mass",
+              "value": "24",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "связка PMMA 24 г"
+              }
+            },
+            {
+              "name": "plasticizer_name",
+              "value": "DBP",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "пластификатор DBP"
+              }
+            },
+            {
+              "name": "plasticizer_mass",
+              "value": "12",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "пластификатор DBP 12 г"
+              }
+            },
+            {
+              "name": "mixing_time_total",
+              "value": "Еще 16 ч",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "Еще 16 ч на роллах"
+              }
+            },
+            {
+              "name": "viscosity_initial",
+              "value": "3,8",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "Вязкость утром была 3,8 Па·с"
+              }
+            },
+            {
+              "name": "temperature_initial",
+              "value": "25 °C",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "(25 °C)"
+              }
+            },
+            {
+              "name": "solvent_addition_mass",
+              "value": "8 г",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "Добавили еще 8 г смеси растворителей"
+              }
+            },
+            {
+              "name": "viscosity_final",
+              "value": "3,1 Па·с",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "после этого 3,1 Па·с"
+              }
+            },
+            {
+              "name": "filter_mesh_size",
+              "value": "100 мкм",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "Фильтр 100 мкм"
+              }
+            },
+            {
+              "name": "vacuum_duration",
+              "value": "примерно 15 мин",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "Вакуум примерно 15 мин"
+              }
+            },
+            {
+              "name": "vacuum_pressure",
+              "value": "-0,08 МПа",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "-0,08 МПа"
+              }
+            }
+          ]
+        },
+        {
+          "type": "process",
+          "name": "Нанесение и сушка",
+          "parameters": [
+            {
+              "name": "knife_gap",
+              "value": "0,75 мм",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "Лили ножом 0,75 мм"
+              }
+            },
+            {
+              "name": "carriage_speed",
+              "value": "0,6 м/мин",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "скорость каретки 0,6 м/мин"
+              }
+            },
+            {
+              "name": "substrate_material",
+              "value": "силиконизированный ПЭТ",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "Подложка силиконизированный ПЭТ"
+              }
+            },
+            {
+              "name": "drying_temperature_range_min",
+              "value": "21-23 °C",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "Сушилось при комнатной, примерно 21-23 °C"
+              }
+            },
+            {
+              "name": "drying_duration",
+              "value": "ночь",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "ночь"
+              }
+            }
+          ]
+        },
+        {
+          "type": "result",
+          "name": "Итоговые параметры",
+          "parameters": [
+            {
+              "name": "sheets_count",
+              "value": "5 листов",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "Получилось 5 листов"
+              }
+            },
+            {
+              "name": "defect_description",
+              "value": "край у листа №2 с утолщением",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "один край у листа №2 с утолщением"
+              }
+            },
+            {
+              "name": "usable_area_total",
+              "value": "1,7 м2",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "Годная площадь суммарно 1,7 м2"
+              }
+            },
+            {
+              "name": "dry_tape_thickness_min",
+              "value": "0,31-0,34 мм",
+              "unit": null,
+              "value_type": "scalar",
+              "source": {
+                "source_type": "user_input",
+                "raw_text_fragment": "Толщина сухой ленты 0,31-0,34 мм"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "conclusion": null
+}

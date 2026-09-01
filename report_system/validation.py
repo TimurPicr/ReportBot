@@ -24,7 +24,7 @@ def validate_facts(document: Document, text: str) -> ValidationResult:
     dates = {token for value in source_text for token in DATE.findall(value)}
     issues: list[ValidationIssue] = []
 
-    for token in dict.fromkeys(NUMBER.findall(text)):
+    for token in dict.fromkeys(_report_numbers(text)):
         if _number(token) not in numbers:
             issues.append(ValidationIssue(severity="error", statement=token, reason="Число отсутствует в подтверждённых данных", check="unknown_number"))
     for token in dict.fromkeys(IDENTIFIER.findall(text)):
@@ -43,6 +43,16 @@ def _number(value: str) -> Decimal | None:
         return None
 
 
+def _report_numbers(text: str):
+    for match in NUMBER.finditer(text):
+        line_start = text.rfind("\n", 0, match.start()) + 1
+        prefix = text[line_start:match.start()]
+        suffix = text[match.end():match.end() + 1]
+        if not prefix.strip() and suffix in {".", ")"}:
+            continue
+        yield match.group()
+
+
 def _text_values(value: Any):
     if isinstance(value, dict):
         for item in value.values():
@@ -52,4 +62,3 @@ def _text_values(value: Any):
             yield from _text_values(item)
     elif value is not None:
         yield str(value)
-

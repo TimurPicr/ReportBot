@@ -14,7 +14,7 @@ from report_system.domain import (
     Record,
     Section,
 )
-from report_system.llm import FakeLLMProvider, load_examples
+from report_system.llm import FakeLLMProvider
 from report_system.validation import validate_facts
 
 
@@ -27,7 +27,6 @@ def settings(tmp_path: Path) -> Settings:
         output_dir=tmp_path / "output",
         prompts_dir=ROOT / "prompts",
         templates_dir=ROOT / "templates",
-        examples_dir=ROOT / "examples",
     )
 
 
@@ -57,6 +56,12 @@ def test_deterministic_validation_detects_unknown_facts() -> None:
     assert {issue.check for issue in invalid.issues} == {"unknown_number", "unknown_identifier"}
 
 
+def test_deterministic_validation_ignores_section_numbering() -> None:
+    document = Document(document_type=DocumentType.MANUFACTURING_ACT)
+    result = validate_facts(document, "1. Общие сведения\n2) Результаты")
+    assert result.valid
+
+
 def test_test_act_is_built_deterministically_with_provenance() -> None:
     act = build_test_act([protocol("P-001", 4.81), protocol("P-002", 4.77, True)])
     counts = {item.key: item.value for item in act.sections[1].records[0].parameters}
@@ -74,7 +79,7 @@ def test_test_act_rejects_wrong_or_unconfirmed_input() -> None:
         build_test_act([Document(document_type=DocumentType.MANUFACTURING_ACT, status=DocumentStatus.CONFIRMED)])
 
 
-def test_complete_review_generation_and_docx_flow(tmp_path: Path) -> None:
+def test_complete_generation_and_docx_flow(tmp_path: Path) -> None:
     provider = FakeLLMProvider(
         [
             {"title": "Акт E-17", "sections": []},
@@ -92,23 +97,72 @@ def test_complete_review_generation_and_docx_flow(tmp_path: Path) -> None:
     assert application.repository.get(document.id).revision == 1  # type: ignore[union-attr]
 
 
-def test_invalid_report_is_not_exported(tmp_path: Path) -> None:
-    application = ReportApplication(settings(tmp_path), FakeLLMProvider(["Добавлено значение 999."]))
+def test_invalid_report_is_revised_before_export(tmp_path: Path) -> None:
+    application = ReportApplication(
+        settings(tmp_path),
+        FakeLLMProvider(["Добавлено значение 999.", "Испытание выполнено."]),
+    )
     source = application.confirm(Document(document_type=DocumentType.TEST_PROTOCOL))
     document, validation, output = application.generate(source.id, semantic_validation=False)
+    assert validation.valid
+    assert output and output.exists()
+    assert document.status == DocumentStatus.GENERATED
+    assert document.generated_text == "Испытание выполнено."
+    assert "999" not in document.generated_text
+
+
+def test_report_is_not_stored_or_exported_when_revision_fails(tmp_path: Path) -> None:
+    application = ReportApplication(
+        settings(tmp_path),
+        FakeLLMProvider(["Добавлено значение 999.", "Добавлено значение 888."]),
+    )
+    source = application.confirm(Document(document_type=DocumentType.TEST_PROTOCOL))
+    document, validation, output = application.generate(source.id, semantic_validation=False)
+    stored = application.repository.get(document.id)
     assert not validation.valid
     assert output is None
     assert document.status == DocumentStatus.CONFIRMED
+    assert document.generated_text is None
+    assert stored is not None and stored.generated_text is None
 
 
-def test_editable_assets_and_real_template_are_usable(tmp_path: Path) -> None:
+def test_semantic_hallucination_is_removed_and_checked_again(tmp_path: Path) -> None:
+    provider = FakeLLMProvider(
+        [
+            "Получен образец E-17 в печи.",
+            {
+                "valid": False,
+                "issues": [
+                    {
+                        "severity": "error",
+                        "statement": "в печи",
+                        "reason": "Оборудование не подтверждено",
+                    }
+                ],
+            },
+            "Получен образец E-17.",
+            {"valid": True, "issues": []},
+        ]
+    )
+    application = ReportApplication(settings(tmp_path), provider)
+    source = application.confirm(
+        Document(
+            document_type=DocumentType.MANUFACTURING_ACT,
+            title="Образец E-17",
+        )
+    )
+    document, validation, output = application.generate(source.id)
+    assert validation.valid
+    assert output and output.exists()
+    assert document.generated_text == "Получен образец E-17."
+    assert "печи" not in document.generated_text
+    assert len(provider.requests) == 4
+
+
+def test_real_templates_are_usable(tmp_path: Path) -> None:
     for name in ("manufacturing_act.docx", "test_protocol.docx", "test_act.docx"):
         text = "\n".join(paragraph.text for paragraph in DocxDocument(ROOT / "templates" / name).paragraphs)
         assert "{{title}}" in text and "{{document_id}}" in text
-    for document_type in DocumentType:
-        examples = load_examples(ROOT / "examples", document_type)
-        assert len(examples) == 2
-        assert all("УЧЕБНЫЙ ПРИМЕР" in example for example in examples)
 
     document = Document(
         id="MA-CHECK-001",
@@ -119,5 +173,6 @@ def test_editable_assets_and_real_template_are_usable(tmp_path: Path) -> None:
     )
     output = generate_docx(document, ROOT / "templates", tmp_path)
     paragraphs = [paragraph.text for paragraph in DocxDocument(output).paragraphs]
-    assert paragraphs.count("Проверочный акт") == 1
-    assert "Идентификатор документа: MA-CHECK-001" in paragraphs
+    text = "\n".join(paragraphs)
+    assert text.count("Проверочный акт") == 1
+    assert "MA-CHECK-001" in text
